@@ -17,7 +17,7 @@ function setupAxis3D(ax)
         'YTickLabel', -50:10:70, ...
         'ZTickLabel', 0:5:30);
     title(ax, 'KHÔNG GIAN 3D', ...
-          'Color', [0.95, 0.95, 1], 'FontSize', 12, 'FontWeight', 'bold');
+          'Color', [0.95, 0.95, 1], 'FontSize', 10, 'FontWeight', 'bold');
     
     set(ax, ...
         'Color', [0.05, 0.12, 0.18], ...
@@ -29,4 +29,5 @@ function setupAxis3D(ax)
     );
     
     view(ax, 45, 25);
+    rotate3d(ax, 'on');
 end

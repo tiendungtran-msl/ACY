@@ -5,10 +5,10 @@ function updateAllTargetTables(sim_state)
     target_tables = sim_state.target_tables;
     SCH = sim_state.SCH;
     targets_protect = sim_state.targets_protect;
+    fire_units = sim_state.fire_units;  % ← THÊM DÒNG NÀY
     
     for i = 1:length(targets)
-        updateSingleTargetTable(target_tables{i}, targets(i), SCH, targets_protect);
-    end
+        updateSingleTargetTable(target_tables{i}, targets(i), SCH, targets_protect, fire_units);  % ← THÊM fire_units
     
     % Lưu lại
     sim_state.targets = targets;

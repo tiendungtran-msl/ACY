@@ -14,4 +14,7 @@ function drawStaticElements(ax_main, ax_3d, SCH, targets_protect, fire_units)
     for i = 1:length(fire_units)
         drawFireUnit(ax_main, ax_3d, fire_units(i), fire_colors{i});
     end
+
+    % Vẽ đơn vị hỏa lực
+    drawDistributionZone(ax_main, SCH);
 end

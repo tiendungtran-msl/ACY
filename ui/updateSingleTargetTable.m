@@ -1,6 +1,6 @@
-function updateSingleTargetTable(table_handle, target, SCH, targets_protect)
+function updateSingleTargetTable(table_handle, target, SCH, targets_protect, fire_units)
     if strcmp(target.status, 'Đang bay')
-        Bj = calculateThreatLevel(target, SCH.pos(1:2), targets_protect);
+        Bj = calculateThreatLevel(target, SCH.pos(1:2), targets_protect, fire_units);
         dist_to_sch = norm(target.pos(1:2) - SCH.pos(1:2)) / 1000;
         
         % Tạo dữ liệu bảng

@@ -5,7 +5,7 @@ function [h_marker, h_label, h_traj] = drawTarget2D(sim_state, target_idx)
     pos = target.pos;
     
     % Tính điểm Bj
-    Bj = calculateThreatLevel(target, sim_state.SCH.pos(1:2), sim_state.targets_protect);
+    Bj = calculateThreatLevel(target, sim_state.SCH.pos(1:2), sim_state.targets_protect, sim_state.fire_units);
     
     % Lấy màu
     color = getThreatColor(Bj);

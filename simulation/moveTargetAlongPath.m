@@ -45,7 +45,7 @@ function target = moveTargetAlongPath(target, dt)
         % Tính vector vận tốc
         if new_idx < size(smooth_path, 1)
             direction = smooth_path(new_idx+1,:) - smooth_path(new_idx,:);
-            if norm(direction) > 0
+            if norm(direction) > 0  
                 target.vel(1:2) = target.speed * direction / norm(direction);
             end
         end

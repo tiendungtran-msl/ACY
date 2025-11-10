@@ -4,9 +4,9 @@ function setupAxis2D(ax)
     grid(ax, 'on');
     axis(ax, [-50000, 50000, -20000, 80000]);
     
-    xlabel(ax, 'X (km)', 'Color', [0.9, 0.9, 0.9], 'FontSize', 10);
-    ylabel(ax, 'Y (km)', 'Color', [0.9, 0.9, 0.9], 'FontSize', 10);
-    title(ax, 'TÌNH HÌNH TRÊN KHÔNG - ĐÁNH GIÁ MỨC ĐỘ NGUY HIỂM', ...
+    xlabel(ax, 'X (m)', 'Color', [0.9, 0.9, 0.9], 'FontSize', 10);
+    ylabel(ax, 'Y (m)', 'Color', [0.9, 0.9, 0.9], 'FontSize', 10);
+    title(ax, 'TÌNH HÌNH TRÊN KHÔNG - ĐÁNH GIÁ MỨC ĐỘ QUAN TRỌNG', ...
           'Color', [0.95, 0.95, 1], 'FontSize', 13, 'FontWeight', 'bold');
     
     % Tùy chỉnh grid
