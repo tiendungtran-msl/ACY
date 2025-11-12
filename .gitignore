@@ -1,0 +1,40 @@
+# MATLAB Build Artifacts
+*.asv
+*.m~
+*.autosave
+*.mex*
+*.o
+*.obj
+*.slxc
+slprj/
+*.slxp
+
+# Generated Files
+*.mat
+!Data/TargetDatabase.mat
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE Files
+.vscode/
+.idea/
+*.code-workspace
+
+# Temporary Files
+/tmp/
+temp/
+*.tmp
+
+# Log Files
+*.log
+
+# Resources
+resources/project/
+
+# Backup Files
+*.bak
+*_backup*
