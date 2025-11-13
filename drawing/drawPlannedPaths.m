@@ -6,9 +6,10 @@ function drawPlannedPaths(ax_main, ax_3d, targets)
         wp = targets(i).waypoints;
         color = targets(i).color;
         
-        % 2D - Đường cong mượt
+        % 2D - Đường cong mượt (làm nhạt màu bằng cách pha với trắng)
+        light_col = lightenColor(color, 0.3); % alpha~0.3
         plot(ax_main, smooth_path(:,1), smooth_path(:,2), '-', ...
-             'Color', [color, 0.3], ...
+             'Color', light_col, ...
              'LineWidth', 1.2);
         
         % Waypoints
@@ -23,7 +24,13 @@ function drawPlannedPaths(ax_main, ax_3d, targets)
         % 3D
         smooth_path_3d = [smooth_path, ones(size(smooth_path,1),1) * targets(i).H];
         plot3(ax_3d, smooth_path_3d(:,1), smooth_path_3d(:,2), smooth_path_3d(:,3), '-', ...
-              'Color', [color, 0.3], ...
+              'Color', light_col, ...
               'LineWidth', 1.2);
     end
+end
+
+function c = lightenColor(color, alpha)
+    % Pha màu với trắng để tạo hiệu ứng "nhạt"
+    % alpha ∈ [0..1], alpha nhỏ -> nhạt nhiều
+    c = color * (1 - alpha) + [1, 1, 1] * alpha;
 end
