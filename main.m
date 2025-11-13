@@ -52,6 +52,14 @@ sim_state = initializeSimulationState(fig, targets, SCH, ...
 % Cập nhật bảng thông tin ban đầu
 updateAllTargetTables(sim_state);
 
+%% BƯỚC 7: Tạo cửa sổ Ground Truth
+fprintf('[7/7] Đang tạo cửa sổ Ground Truth...\n');
+gt_window = createGroundTruthWindow(targets);
+sim_state.gt_window = gt_window;
+
+% Cập nhật lần đầu
+updateGroundTruthTables(gt_window, sim_state.targets, sim_state.SCH, sim_state.fire_units);
+
 fprintf('\n✓ Hệ thống đã sẵn sàng!\n');
 fprintf('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 fprintf('▶ Nhấn "BẮT ĐẦU" để khởi động mô phỏng\n');

@@ -41,4 +41,7 @@ function sim_state = initializeSimulationState(fig, targets, SCH, ...
     
     % Lưu vào figure
     setappdata(fig, 'sim_state', sim_state);
+
+    % Timer cho cập nhật bảng
+    sim_state.last_table_update = 0;
 end
