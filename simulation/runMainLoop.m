@@ -18,6 +18,9 @@ function runMainLoop(sim_state)
         
         % Cập nhật vị trí
         sim_state = updateTargetPositions(sim_state, dt);
+
+        % THÊM MỚI: Cập nhật RCS theo cự ly
+        sim_state.targets = updateTargetRCS(sim_state.targets, sim_state.fire_units);
         
         % Vẽ lại
         sim_state = redrawTargets(sim_state);

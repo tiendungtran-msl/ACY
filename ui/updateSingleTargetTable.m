@@ -9,7 +9,7 @@ function updateSingleTargetTable(table_handle, target, SCH, targets_protect, fir
             'Tên', target.name;
             'Loại', target.type;
             'Vận tốc', sprintf('%d m/s', round(target.speed));
-            'Độ cao', sprintf('%d m', round(target.H));
+            'Độ cao', sprintf('%d m', round(target.pos(3)));
             'RCS', sprintf('%.2f m²', target.RCS);
             'Cơ động', sprintf('%.1f G', target.maneuver_ability);
             'Nhiệm vụ', target.task;

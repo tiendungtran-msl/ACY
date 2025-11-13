@@ -1,5 +1,5 @@
 function target = moveTargetAlongPath(target, dt)
-    % Di chuyển mục tiêu dọc theo đường cong
+    %% DI CHUYỂN MỤC TIÊU VỚI VẬN TỐC PHỤ THUỘC ĐỘ CONG
     
     smooth_path = target.smooth_path;
     current_idx = target.path_index;
@@ -7,17 +7,135 @@ function target = moveTargetAlongPath(target, dt)
     if current_idx >= size(smooth_path, 1)
         target.status = 'Hoàn thành';
         target.vel = [0, 0, 0];
+        target.speed = 0;
         return;
     end
     
-    % Tính quãng đường cần di chuyển
+    % ═══════════════════════════════════════════════════════
+    % TÍNH ĐỘ CONG (CURVATURE) TRONG ĐOẠN TIẾP THEO
+    % ═══════════════════════════════════════════════════════
+    look_ahead = min(10, size(smooth_path, 1) - current_idx);  % Nhìn trước 10 điểm
+    
+    curvature = 0;
+    total_angle = 0;
+    total_dist = 0;
+    
+    if current_idx > 1 && current_idx + look_ahead <= size(smooth_path, 1)
+        for k = 0:look_ahead-1
+            if current_idx + k < size(smooth_path, 1)
+                prev_dir = smooth_path(current_idx+k, :) - smooth_path(max(1, current_idx+k-1), :);
+                next_dir = smooth_path(current_idx+k+1, :) - smooth_path(current_idx+k, :);
+                
+                prev_norm = norm(prev_dir);
+                next_norm = norm(next_dir);
+                
+                if prev_norm > 0 && next_norm > 0
+                    % Tính góc giữa 2 vector
+                    cos_angle = dot(prev_dir, next_dir) / (prev_norm * next_norm);
+                    cos_angle = max(-1, min(1, cos_angle));
+                    angle = acos(cos_angle);
+                    
+                    total_angle = total_angle + angle;
+                    total_dist = total_dist + next_norm;
+                end
+            end
+        end
+        
+        if total_dist > 0
+            curvature = total_angle / total_dist;  % rad/m
+        end
+    end
+    
+    % ═══════════════════════════════════════════════════════
+    % XÁC ĐỊNH TỐC ĐỘ MỤC TIÊU DỰA TRÊN ĐỘ CONG
+    % ═══════════════════════════════════════════════════════
+    g = 9.81;
+    n_max = target.maneuver_ability;
+    v_cruise = target.speed_cruise;
+    v_min = target.speed_min;
+    v_max = target.speed_max;
+    
+    % Phân loại độ cong
+    curvature_straight = 0.00005;   % < 0.00005 rad/m: BAY THẲNG
+    curvature_light = 0.0002;       % < 0.0002 rad/m: CONG NHẸ
+    curvature_medium = 0.0008;      % < 0.0008 rad/m: CONG VỪA
+    
+    target_speed = v_cruise;  % Mặc định: tốc độ hành trình
+    
+    if curvature < curvature_straight
+        % ══════════════════════════════════════════════════
+        % BAY THẲNG → TỐC ĐỘ TỐI ĐA
+        % ══════════════════════════════════════════════════
+        target_speed = v_max * 0.95;
+        
+    elseif curvature < curvature_light
+        % ══════════════════════════════════════════════════
+        % CONG NHẸ → TĂNG TỐC NHẸ
+        % ══════════════════════════════════════════════════
+        target_speed = v_cruise * 1.1;  % +10%
+        
+    elseif curvature < curvature_medium
+        % ══════════════════════════════════════════════════
+        % CONG VỪA → TỐC ĐỘ HÀNH TRÌNH
+        % ══════════════════════════════════════════════════
+        target_speed = v_cruise;
+        
+    else
+        % ══════════════════════════════════════════════════
+        % CONG GẤP → GIẢM TỐC ĐỂ ĐẢM BẢO n ≤ n_max
+        % ══════════════════════════════════════════════════
+        % Công thức: n = v²/(r*g), với r ≈ 1/curvature
+        % → v_max = sqrt(n_max * g * r) = sqrt(n_max * g / curvature)
+        
+        if curvature > 0.0001  % Tránh chia cho 0
+            radius = 1 / curvature;
+            v_turn_max = sqrt(n_max * g * radius);
+            
+            % Giảm tốc nhưng không xuống quá thấp
+            target_speed = max(v_min, min(v_cruise * 0.8, v_turn_max));
+        else
+            target_speed = v_cruise;
+        end
+    end
+    
+    % Đảm bảo trong giới hạn
+    target_speed = max(v_min, min(v_max, target_speed));
+    
+    % ═══════════════════════════════════════════════════════
+    % ĐIỀU CHỈNH TỐC ĐỘ MỀM MẠI (KHÔNG NHẢY ĐỘT NGỘT)
+    % ═══════════════════════════════════════════════════════
+    speed_diff = target_speed - target.speed;
+    max_speed_change = target.accel_max * dt * 3;  % Cho phép thay đổi nhanh hơn
+    
+    if abs(speed_diff) < 5  % Đã gần đạt tốc độ mục tiêu
+        target.current_accel = 0;
+        target.speed = target_speed;
+    else
+        % Thay đổi tốc độ dần dần
+        if speed_diff > max_speed_change
+            delta_speed = max_speed_change;
+            target.current_accel = target.accel_max;
+        elseif speed_diff < -max_speed_change
+            delta_speed = -max_speed_change;
+            target.current_accel = -target.accel_max * 1.5;  % Giảm tốc nhanh hơn
+        else
+            delta_speed = speed_diff;
+            target.current_accel = delta_speed / dt;
+        end
+        
+        target.speed = target.speed + delta_speed;
+        target.speed = max(v_min, min(v_max, target.speed));
+    end
+    
+    % ═══════════════════════════════════════════════════════
+    % DI CHUYỂN THEO TỐC ĐỘ ĐÃ XÁC ĐỊNH
+    % ═══════════════════════════════════════════════════════
     distance_to_move = target.speed * dt;
     accumulated_dist = 0;
     new_idx = current_idx;
     
-    % Di chuyển dọc path
     while new_idx < size(smooth_path, 1) && accumulated_dist < distance_to_move
-        segment_dist = norm(smooth_path(new_idx+1,:) - smooth_path(new_idx,:));
+        segment_dist = norm(smooth_path(new_idx+1, :) - smooth_path(new_idx, :));
         
         if accumulated_dist + segment_dist <= distance_to_move
             accumulated_dist = accumulated_dist + segment_dist;
@@ -26,28 +144,50 @@ function target = moveTargetAlongPath(target, dt)
             % Nội suy vị trí
             remaining_dist = distance_to_move - accumulated_dist;
             ratio = remaining_dist / segment_dist;
-            target.pos(1:2) = smooth_path(new_idx,:) + ...
-                ratio * (smooth_path(new_idx+1,:) - smooth_path(new_idx,:));
+            
+            target.pos = smooth_path(new_idx, :) + ...
+                ratio * (smooth_path(new_idx+1, :) - smooth_path(new_idx, :));
+            
             new_idx = new_idx + 1;
             break;
         end
     end
     
-    % Cập nhật trạng thái
+    % ═══════════════════════════════════════════════════════
+    % CẬP NHẬT TRẠNG THÁI
+    % ═══════════════════════════════════════════════════════
     if new_idx >= size(smooth_path, 1)
-        target.pos(1:2) = smooth_path(end,:);
+        target.pos = smooth_path(end, :);
         target.status = 'Hoàn thành';
         target.vel = [0, 0, 0];
+        target.speed = 0;
     else
         target.path_index = new_idx;
-        target.pos(1:2) = smooth_path(new_idx,:);
+        target.pos = smooth_path(new_idx, :);
         
-        % Tính vector vận tốc
+        % Cập nhật vector vận tốc
         if new_idx < size(smooth_path, 1)
-            direction = smooth_path(new_idx+1,:) - smooth_path(new_idx,:);
-            if norm(direction) > 0  
-                target.vel(1:2) = target.speed * direction / norm(direction);
+            direction = smooth_path(new_idx+1, :) - smooth_path(new_idx, :);
+            direction_norm = norm(direction);
+            
+            if direction_norm > 0
+                target.vel = target.speed * direction / direction_norm;
+            else
+                target.vel = [0, 0, 0];
             end
+        end
+    end
+    
+    % ═══════════════════════════════════════════════════════
+    % LƯU QUỸ ĐẠO ĐÃ ĐI QUA (CHỈ 2D)
+    % ═══════════════════════════════════════════════════════
+    if ~isfield(target, 'trajectory_history') || isempty(target.trajectory_history)
+        target.trajectory_history = target.pos(1:2);
+    else
+        % Chỉ lưu nếu di chuyển đủ xa (tránh lưu quá dày)
+        last_pos = target.trajectory_history(end, :);
+        if norm(target.pos(1:2) - last_pos) > 50  % Mỗi 50m
+            target.trajectory_history = [target.trajectory_history; target.pos(1:2)];
         end
     end
 end
