@@ -27,17 +27,25 @@ function [h_marker, h_label, h_traj] = drawTarget2D(sim_state, target_idx)
         'MarkerEdgeColor', [1, 1, 1], ...
         'LineWidth', 1.3);
     
-    % Tạo label (thêm RCS hiệu dụng)
+    % Tạo label (theo format trong ảnh: RCS=3.72 | H=15k | D=67.9km)
     dist_to_sch = norm(pos(1:2) - sim_state.SCH.pos(1:2)) / 1000;
     
-    if target.priority_from_command
-        label_text = sprintf('⚡ %s\n%s\nBj=%.2f ★\nRCS=%.2f | H=%dk | D=%.1fkm', ...
-            target.name, target.type, Bj, RCS_eff, ...
-            round(target.pos(3)/1000), dist_to_sch);  % ← SỬA ĐÂY
+    % Lấy RCS_eff từ target (đã tính trong updateTargetRCS)
+    if isfield(target, 'RCS_eff')
+        RCS_display = target.RCS_eff;
     else
-        label_text = sprintf('%s\n%s\nBj=%.2f ★\nRCS=%.2f | H=%dk | D=%.1fkm', ...
-            target.name, target.type, Bj, RCS_eff, ...
-            round(target.pos(3)/1000), dist_to_sch);  % ← VÀ ĐÂY
+        RCS_display = RCS_eff;  % Fallback
+    end
+    
+    % Độ cao (km)
+    H_km = round(target.pos(3) / 1000);
+    
+    if target.priority_from_command
+        label_text = sprintf('⚡ %s\n%s\nBj=%.2f\nRCS=%.2f | H=%dk | D=%.1fkm', ...
+            target.name, target.type, Bj, RCS_display, H_km, dist_to_sch);
+    else
+        label_text = sprintf('%s\n%s\nBj=%.2f\nRCS=%.2f | H=%dk | D=%.1fkm', ...
+            target.name, target.type, Bj, RCS_display, H_km, dist_to_sch);
     end
     
     h_label = text(sim_state.ax_main, pos(1)+2000, pos(2)+2000, label_text, ...

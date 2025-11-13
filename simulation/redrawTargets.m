@@ -31,10 +31,41 @@ function sim_state = redrawTargets(sim_state)
                     drawTarget2D(sim_state, i);
             end
             
-            % Cập nhật label 2D
+            % Cập nhật label 2D (CẢ VỊ TRÍ VÀ NỘI DUNG)
             if ishandle(sim_state.h_labels_2d(i)) && isvalid(sim_state.h_labels_2d(i))
+                % Tính toán thông tin hiển thị
+                Bj = calculateThreatLevel(target, sim_state.SCH.pos(1:2), ...
+                    sim_state.targets_protect, sim_state.fire_units);
+                color = getThreatColor(Bj);
+                bg_color = getThreatBackgroundColor(Bj);
+                
+                dist_to_sch = norm(target.pos(1:2) - sim_state.SCH.pos(1:2)) / 1000;
+                
+                % Lấy RCS_eff
+                if isfield(target, 'RCS_eff')
+                    RCS_display = target.RCS_eff;
+                else
+                    RCS_display = target.RCS;
+                end
+                
+                % Độ cao (km)
+                H_km = round(target.pos(3) / 1000);
+                
+                % Tạo label text
+                if target.priority_from_command
+                    label_text = sprintf('⚡ %s\n%s\nBj=%.2f\nRCS=%.2f | h=%.0fm | D=%.1fkm', ...
+                        target.name, target.type, Bj, RCS_display, target.pos(3), dist_to_sch);
+                else
+                    label_text = sprintf('%s\n%s\nBj=%.2f\nRCS=%.2f | h=%.0fm | D=%.1fkm', ...
+                        target.name, target.type, Bj, RCS_display, target.pos(3), dist_to_sch);
+                end
+                
+                % Cập nhật vị trí và nội dung
                 set(sim_state.h_labels_2d(i), ...
-                    'Position', [target.pos(1)+2000, target.pos(2)+2000, 0]);
+                    'Position', [target.pos(1)+2000, target.pos(2)+2000, 0], ...
+                    'String', label_text, ...
+                    'BackgroundColor', bg_color, ...
+                    'EdgeColor', color);
             end
             
             % Cập nhật quỹ đạo 2D (CHỈ PHẦN ĐÃ ĐI QUA)
@@ -79,10 +110,38 @@ function sim_state = redrawTargets(sim_state)
                     drawTarget3D(sim_state, i);
             end
             
-            % Cập nhật label 3D
+            % Cập nhật label 3D (CẢ VỊ TRÍ VÀ NỘI DUNG)
             if ishandle(sim_state.h_labels_3d(i)) && isvalid(sim_state.h_labels_3d(i))
+                % Tính toán thông tin
+                Bj = calculateThreatLevel(target, sim_state.SCH.pos(1:2), ...
+                    sim_state.targets_protect, sim_state.fire_units);
+                color = getThreatColor(Bj);
+                bg_color = getThreatBackgroundColor(Bj);
+                
+                % Lấy RCS_eff
+                if isfield(target, 'RCS_eff')
+                    RCS_display = target.RCS_eff;
+                else
+                    RCS_display = target.RCS;
+                end
+                
+                H_km = round(target.pos(3) / 1000);
+                
+                % Label 3D đơn giản hơn
+                if target.priority_from_command
+                    label_text = sprintf('⚡ %s\nBj=%.2f\nRCS=%.2f | h=%.0fm', ...
+                        target.name, Bj, RCS_display, target.pos(3));
+                else
+                    label_text = sprintf('%s\nBj=%.2f\nRCS=%.2f | h=%.0fm', ...
+                        target.name, Bj, RCS_display, target.pos(3));
+                end
+                
+                % Cập nhật vị trí và nội dung
                 set(sim_state.h_labels_3d(i), ...
-                    'Position', [target.pos(1), target.pos(2), target.pos(3)+1500]);
+                    'Position', [target.pos(1), target.pos(2), target.pos(3)+1500], ...
+                    'String', label_text, ...
+                    'BackgroundColor', bg_color, ...
+                    'EdgeColor', color);
             end
             
             % Cập nhật quỹ đạo 3D (TOÀN BỘ)
