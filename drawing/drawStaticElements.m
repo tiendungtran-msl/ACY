@@ -17,4 +17,12 @@ function drawStaticElements(ax_main, ax_3d, SCH, targets_protect, fire_units)
 
     % Vẽ đơn vị hỏa lực
     drawDistributionZone(ax_main, SCH);
+
+    % ═══════════════════════════════════════════════════════
+    % VẼ VÙNG QUAN SÁT 60KM
+    % ═══════════════════════════════════════════════════════
+    observation_radius = 60000;  % 60km
+    [~, ~] = drawObservationZone(ax_main, ax_3d, SCH, observation_radius);
+    
+    legend(ax_main, 'off');
 end

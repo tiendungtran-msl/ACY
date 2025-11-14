@@ -44,4 +44,5 @@ function sim_state = initializeSimulationState(fig, targets, SCH, ...
 
     % Timer cho cập nhật bảng
     sim_state.last_table_update = 0;
+    sim_state.last_draw = 0;  % ← THÊM DÒNG NÀY
 end

@@ -55,10 +55,13 @@ function target = moveTargetAlongPath(target, dt)
     v_min = target.speed_min;
     v_max = target.speed_max;
     
-    % Phân loại độ cong
-    curvature_straight = 0.00005;   % < 0.00005 rad/m: BAY THẲNG
-    curvature_light = 0.0002;       % < 0.0002 rad/m: CONG NHẸ
-    curvature_medium = 0.0008;      % < 0.0008 rad/m: CONG VỪA
+    % ───────────────────────────────────────────────────────
+    % NGƯỠNG ĐỘ CONG (ĐÃ ĐIỀU CHỈNH CHO RÕ RÀNG HƠN)
+    % ───────────────────────────────────────────────────────
+    curvature_straight = 0.00003;   % < 0.00003 rad/m: BAY THẲNG
+    curvature_light = 0.0001;       % < 0.0001 rad/m: CONG NHẸ
+    curvature_medium = 0.0005;      % < 0.0005 rad/m: CONG VỪA
+    % >= 0.0005 rad/m: CONG GẤP
     
     target_speed = v_cruise;  % Mặc định: tốc độ hành trình
     
@@ -78,23 +81,29 @@ function target = moveTargetAlongPath(target, dt)
         % ══════════════════════════════════════════════════
         % CONG VỪA → TỐC ĐỘ HÀNH TRÌNH
         % ══════════════════════════════════════════════════
-        target_speed = v_cruise;
+        target_speed = v_cruise * 0.9;  % -10% (giảm nhẹ)
         
     else
         % ══════════════════════════════════════════════════
-        % CONG GẤP → GIẢM TỐC ĐỂ ĐẢM BẢO n ≤ n_max
+        % CONG GẤP → GIẢM TỐC MẠNH
         % ══════════════════════════════════════════════════
-        % Công thức: n = v²/(r*g), với r ≈ 1/curvature
-        % → v_max = sqrt(n_max * g * r) = sqrt(n_max * g / curvature)
+        % Công thức vật lý: n = v²/(r*g)
+        % → v_safe = sqrt(n_max * g * r) = sqrt(n_max * g / curvature)
         
-        if curvature > 0.0001  % Tránh chia cho 0
+        if curvature > 0.00001  % Tránh chia cho 0
             radius = 1 / curvature;
-            v_turn_max = sqrt(n_max * g * radius);
+            v_safe = sqrt(n_max * g * radius);
             
-            % Giảm tốc nhưng không xuống quá thấp
-            target_speed = max(v_min, min(v_cruise * 0.8, v_turn_max));
+            % Giảm tốc về 60-70% tốc độ an toàn (để thoải mái hơn)
+            target_speed = v_safe * 0.65;
+            
+            % Đảm bảo không giảm quá thấp
+            target_speed = max(v_min, target_speed);
+            
+            % Giới hạn trên không vượt quá 70% v_cruise khi cong gấp
+            target_speed = min(target_speed, v_cruise * 0.7);
         else
-            target_speed = v_cruise;
+            target_speed = v_cruise * 0.8;
         end
     end
     
@@ -102,25 +111,35 @@ function target = moveTargetAlongPath(target, dt)
     target_speed = max(v_min, min(v_max, target_speed));
     
     % ═══════════════════════════════════════════════════════
-    % ĐIỀU CHỈNH TỐC ĐỘ MỀM MẠI (KHÔNG NHẢY ĐỘT NGỘT)
+    % ĐIỀU CHỈNH TỐC ĐỘ MỀM MẠI (NHƯNG GIẢM TỐC NHANH)
     % ═══════════════════════════════════════════════════════
     speed_diff = target_speed - target.speed;
-    max_speed_change = target.accel_max * dt * 3;  % Cho phép thay đổi nhanh hơn
+    max_accel_change = target.accel_max * dt * 4;  % Tăng từ 3 lên 4
+    max_decel_change = target.accel_max * dt * 6;  % Giảm tốc nhanh gấp 1.5 lần
     
-    if abs(speed_diff) < 5  % Đã gần đạt tốc độ mục tiêu
+    if abs(speed_diff) < 3  % Đã gần đạt tốc độ mục tiêu
         target.current_accel = 0;
         target.speed = target_speed;
     else
         % Thay đổi tốc độ dần dần
-        if speed_diff > max_speed_change
-            delta_speed = max_speed_change;
-            target.current_accel = target.accel_max;
-        elseif speed_diff < -max_speed_change
-            delta_speed = -max_speed_change;
-            target.current_accel = -target.accel_max * 1.5;  % Giảm tốc nhanh hơn
+        if speed_diff > 0
+            % TĂNG TỐC
+            if speed_diff > max_accel_change
+                delta_speed = max_accel_change;
+                target.current_accel = target.accel_max;
+            else
+                delta_speed = speed_diff;
+                target.current_accel = delta_speed / dt;
+            end
         else
-            delta_speed = speed_diff;
-            target.current_accel = delta_speed / dt;
+            % GIẢM TỐC (NHANH HƠN)
+            if abs(speed_diff) > max_decel_change
+                delta_speed = -max_decel_change;
+                target.current_accel = -target.accel_max * 2.0;  % Giảm tốc gấp đôi
+            else
+                delta_speed = speed_diff;
+                target.current_accel = delta_speed / dt;
+            end
         end
         
         target.speed = target.speed + delta_speed;

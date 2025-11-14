@@ -1,16 +1,26 @@
 function resetSimulation(src)
     %% RESET MÔ PHỎNG VỀ TRẠNG THÁI BAN ĐẦU
-    % Tạo lại đường bay ngẫu nhiên mỗi lần reset
-    
     fig = ancestor(src, 'figure');
     sim_state = getappdata(fig, 'sim_state');
     
     sim_state.is_running = false;
     sim_state.time = 0;
+    sim_state.last_table_update = 0;
+    sim_state.last_draw = 0;
     
     fprintf('🔄 Đang reset hệ thống và tạo lại đường bay...\n');
     
+    % ═══════════════════════════════════════════════════════
+    % XÓA SAI SỐ ĐO ĐẠC CŨ (QUAN TRỌNG!)
+    % ═══════════════════════════════════════════════════════
+    if isappdata(fig, 'measurement_errors')
+        rmappdata(fig, 'measurement_errors');
+        fprintf('  ✓ Đã xóa sai số đo đạc cũ\n');
+    end
+    
+    % ═══════════════════════════════════════════════════════
     % TẠO LẠI ĐƯỜNG BAY NGẪU NHIÊN
+    % ═══════════════════════════════════════════════════════
     sim_state.targets = createSmoothPaths(sim_state.targets);
     
     % Reset vị trí mục tiêu
@@ -18,7 +28,7 @@ function resetSimulation(src)
         sim_state.targets(i).path_index = 1;
         sim_state.targets(i).pos = sim_state.targets(i).smooth_path(1, :);  % [x, y, z]
         sim_state.targets(i).status = 'Đang bay';
-        sim_state.targets(i).speed = sim_state.targets(i).speed_cruise * 0.8;  % Reset tốc độ
+        sim_state.targets(i).speed = sim_state.targets(i).speed_cruise;  % Tốc độ hành trình
         sim_state.targets(i).current_accel = 0;
         sim_state.targets(i).vel = [0, 0, 0];
         
@@ -60,7 +70,9 @@ function resetSimulation(src)
         fprintf('  ✓ %s: Đường bay mới được tạo\n', sim_state.targets(i).name);
     end
     
+    % ═══════════════════════════════════════════════════════
     % XÓA VÀ VẼ LẠI ĐƯỜNG BAY DỰ KIẾN 3D
+    % ═══════════════════════════════════════════════════════
     cla(sim_state.ax_3d);
     
     % Vẽ lại môi trường 3D
@@ -70,11 +82,25 @@ function resetSimulation(src)
     % Vẽ lại đường bay dự kiến 3D (mới)
     drawPlannedPaths(sim_state.ax_main, sim_state.ax_3d, sim_state.targets);
     
+    % ═══════════════════════════════════════════════════════
+    % CẬP NHẬT BẢNG THÔNG TIN NGAY LẬP TỨC
+    % ═══════════════════════════════════════════════════════
+    updateAllTargetTables(sim_state);
+    
+    % Cập nhật Ground Truth nếu có
+    if isfield(sim_state, 'gt_window') && ...
+       isfield(sim_state.gt_window, 'fig') && ...
+       ishandle(sim_state.gt_window.fig) && ...
+       isvalid(sim_state.gt_window.fig)
+        updateGroundTruthTables(sim_state.gt_window, sim_state.targets, ...
+            sim_state.SCH, sim_state.fire_units);
+    end
+    
+    % Reset buttons
     set(sim_state.buttons.start, 'Enable', 'on');
     set(sim_state.buttons.pause, 'Enable', 'off');
     
     setappdata(fig, 'sim_state', sim_state);
-    updateAllTargetTables(sim_state);
     
     fprintf('✓ Đã reset hệ thống với đường bay mới!\n');
 end

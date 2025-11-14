@@ -1,12 +1,17 @@
 function updateGroundTruthTables(gt_window, targets, SCH, fire_units)
     %% CẬP NHẬT BẢNG GROUND TRUTH (SIÊU NGẮN GỌN)
     
+    observation_radius = 60000;  % 60km
+    
     for i = 1:length(targets)
         target = targets(i);
         
         if strcmp(target.status, 'Đang bay')
-            % Tính khoảng cách
+            % ═══════════════════════════════════════════════════════
+            % TÍNH KHOẢNG CÁCH VÀ KIỂM TRA VÙNG QUAN SÁT
+            % ═══════════════════════════════════════════════════════
             dist_to_sch = norm(target.pos(1:2) - SCH.pos(1:2)) / 1000;
+            in_zone = isTargetInObservationZone(target, SCH, observation_radius);
             
             % Tìm ĐVHL gần nhất
             min_dist_DVHL = inf;
@@ -26,8 +31,15 @@ function updateGroundTruthTables(gt_window, targets, SCH, fire_units)
                 RCS_real = target.RCS;
             end
             
+            % Chuỗi trạng thái vùng
+            if in_zone
+                zone_status = '✓ Trong vùng';
+            else
+                zone_status = '✗ Ngoài vùng';
+            end
+            
             % ═══════════════════════════════════════════════════════
-            % DỮ LIỆU GROUND TRUTH SIÊU NGẮN GỌN (12 DÒNG)
+            % DỮ LIỆU GROUND TRUTH SIÊU NGẮN GỌN
             % ═══════════════════════════════════════════════════════
             data = {
                 'ID', sprintf('T-%d', target.id);
@@ -41,22 +53,12 @@ function updateGroundTruthTables(gt_window, targets, SCH, fire_units)
                 'K/c SCH', sprintf('%.2f km', dist_to_sch);
                 'K/c ĐVHL', sprintf('%s: %.2f km', nearest_DVHL, min_dist_DVHL);
                 'Nhiệm vụ', target.task;
-                'Gây nhiễu', target.jam_type
+                'Gây nhiễu', target.jam_type;
+                'Vùng quan sát', zone_status
             };
             
             set(gt_window.tables{i}, 'Data', data);
             set(gt_window.tables{i}, 'ColumnWidth', {140, 220});
-            
-            % Điều chỉnh chiều cao dòng
-            try
-                jScroll = findjobj(gt_window.tables{i});
-                if ~isempty(jScroll)
-                    jTable = jScroll.getViewport.getView;
-                    jTable.setRowHeight(18);
-                end
-            catch
-                % Không làm gì nếu lỗi
-            end
             
         else
             % Hoàn thành
