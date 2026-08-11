@@ -13,32 +13,17 @@ function [target_type, confidence, detailed_match] = classifyTarget(target)
     % LẤY THÔNG TIN ĐẶC TRƯNG TỪ TARGET
     % ═══════════════════════════════════════════════════════
     
-    % RCS (m²)
-    if isfield(target, 'RCS_eff')
-        RCS = target.RCS_eff;
-    else
-        RCS = target.RCS;
-    end
-    
+    % RCS (m²) - dùng giá trị đo được (có nhiễu) nếu đã tính
+    RCS = target.RCS_eff;
+
     % Vận tốc (m/s)
     V = target.speed;
-    
+
     % Độ cao (m)
     H = target.pos(3);
-    
+
     % Khả năng cơ động (G)
-    if isfield(target, 'maneuver_ability')
-        n = target.maneuver_ability;
-    else
-        n = 5;  % Mặc định
-    end
-    
-    % Gia tốc (m/s²) - nếu cần
-    if isfield(target, 'current_accel')
-        a = target.current_accel;
-    else
-        a = 0;
-    end
+    n = target.maneuver_ability;
     
     % ═══════════════════════════════════════════════════════
     % BẢNG 2: ĐẶC TRƯNG KỸ THUẬT BAY CỦA MỤC TIÊU
@@ -55,25 +40,25 @@ function [target_type, confidence, detailed_match] = classifyTarget(target)
     
     % Danh sách các loại mục tiêu với đặc trưng
     aircraft_types = {
-        struct('name', 'MBNB chiến lược', ...
+        struct('name', 'MB ném bom chiến lược', ...
                'RCS_min', 5, 'RCS_max', 20, ...
                'V_min', 250, 'V_max', 700, ...
                'H_min', 100, 'H_max', 19000, ...
                'n_min', 2, 'n_max', 4);
-        
-        struct('name', 'TK ném bom', ...
+
+        struct('name', 'Tiêm kích ném bom', ...
                'RCS_min', 2, 'RCS_max', 5, ...
                'V_min', 320, 'V_max', 750, ...
                'H_min', 50, 'H_max', 18000, ...
                'n_min', 5, 'n_max', 6);
-        
-        struct('name', 'TK chiến thuật', ...
+
+        struct('name', 'Tiêm kích chiến thuật', ...
                'RCS_min', 1, 'RCS_max', 5, ...
                'V_min', 350, 'V_max', 750, ...
                'H_min', 50, 'H_max', 22000, ...
                'n_min', 6.5, 'n_max', 9);
-        
-        struct('name', 'TL hành trình', ...
+
+        struct('name', 'Tên lửa hành trình', ...
                'RCS_min', 0.01, 'RCS_max', 2.5, ...
                'V_min', 250, 'V_max', 1200, ...
                'H_min', 60, 'H_max', 40000, ...

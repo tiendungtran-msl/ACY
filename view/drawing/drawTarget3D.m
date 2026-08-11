@@ -5,19 +5,10 @@ function [h_marker, h_label, h_traj] = drawTarget3D(sim_state, target_idx)
     target = sim_state.targets(target_idx);
     pos = target.pos;  % [x, y, z]
     
-    % Lấy RCS_eff và distance
-    if isfield(target, 'RCS_eff')
-        RCS_eff = target.RCS_eff;
-    else
-        RCS_eff = target.RCS;
-    end
-    
-    if isfield(target, 'distance_to_DVHL')
-        distance = target.distance_to_DVHL;
-    else
-        distance = inf;
-    end
-    
+    % Lấy RCS_eff
+    RCS_eff = target.RCS_eff;
+
+
     % Tính điểm Bj
     Bj = calculateThreatLevel(target, sim_state.SCH.pos(1:2), ...
         sim_state.targets_protect, sim_state.fire_units);
@@ -58,8 +49,7 @@ function [h_marker, h_label, h_traj] = drawTarget3D(sim_state, target_idx)
         'Margin', 2);
     
     % Vẽ quỹ đạo 3D (toàn bộ trajectory)
-    if isfield(sim_state, 'trajectories') && ...
-       length(sim_state.trajectories) >= target_idx && ...
+    if length(sim_state.trajectories) >= target_idx && ...
        ~isempty(sim_state.trajectories{target_idx})
         
         traj = sim_state.trajectories{target_idx};

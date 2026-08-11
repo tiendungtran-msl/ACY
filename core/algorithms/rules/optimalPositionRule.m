@@ -1,4 +1,4 @@
-function score = rule8_OptimalPosition(target, fire_units)
+function score = optimalPositionRule(target, fire_units)
     % QUY TAC 8: DANH GIA THEO VI TRI TOI UU
     % Output: score thuoc [0, 10]
     

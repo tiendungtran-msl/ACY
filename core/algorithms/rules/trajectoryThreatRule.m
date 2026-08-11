@@ -1,4 +1,4 @@
-function score = rule6_TrajectoryThreat(target, targets_protect)
+function score = trajectoryThreatRule(target, targets_protect)
     % QUY TAC 6: DANH GIA THEO HUONG BAY
     % Output: score thuoc [0, 10]
     
@@ -8,7 +8,7 @@ function score = rule6_TrajectoryThreat(target, targets_protect)
     end
     
     % Du doan quy dao
-    if isfield(target, 'vel') && norm(target.vel) > 0
+    if norm(target.vel) > 0
         velocity = target.vel;
     else
         velocity = [target.speed, 0, 0];

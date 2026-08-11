@@ -10,17 +10,8 @@ function targets = createSmoothPaths(targets)
         end
         
         % Lấy thông số cơ động
-        if isfield(targets(i), 'min_turn_radius')
-            min_radius = targets(i).min_turn_radius;
-        else
-            min_radius = 4000;  % Mặc định 4km
-        end
-        
-        if isfield(targets(i), 'maneuver_ability')
-            n_max = targets(i).maneuver_ability;
-        else
-            n_max = 5;
-        end
+        min_radius = targets(i).min_turn_radius;
+        n_max = targets(i).maneuver_ability;
         
         % ═══════════════════════════════════════════════════════
         % THÊM TÍNH NGẪU NHIÊN VỚI GIỚI HẠN PHÙ HỢP

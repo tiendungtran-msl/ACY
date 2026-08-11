@@ -1,5 +1,5 @@
-function params = Block1_EvaluateMotion(target, dt)
-    %% KHỐI 1: ĐÁNH GIÁ TỌA ĐỘ VÀ THAM SỐ CHUYỂN ĐỘNG
+function params = evaluateMotion(target, dt)
+    %% ĐÁNH GIÁ TỌA ĐỘ VÀ THAM SỐ CHUYỂN ĐỘNG
     % Mô tả: Đánh giá các tham số x, y, H, vₓ, vᵧ, vₕ, Q (hướng bay)
     % Input:
     %   - target: Cấu trúc mục tiêu

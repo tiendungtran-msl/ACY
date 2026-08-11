@@ -31,11 +31,7 @@ function [h_marker, h_label, h_traj] = drawTarget2D(sim_state, target_idx)
     dist_to_sch = norm(pos(1:2) - sim_state.SCH.pos(1:2)) / 1000;
     
     % Lấy RCS_eff từ target (đã tính trong updateTargetRCS)
-    if isfield(target, 'RCS_eff')
-        RCS_display = target.RCS_eff;
-    else
-        RCS_display = RCS_eff;  % Fallback
-    end
+    RCS_display = target.RCS_eff;
     
     % Độ cao (km)
     H_km = round(target.pos(3) / 1000);
@@ -59,7 +55,7 @@ function [h_marker, h_label, h_traj] = drawTarget2D(sim_state, target_idx)
         'Margin', 2.5);
     
     % Vẽ quỹ đạo ĐÃ ĐI QUA (thay vì vẽ toàn bộ trajectory)
-    if isfield(target, 'trajectory_history') && size(target.trajectory_history, 1) > 1
+    if size(target.trajectory_history, 1) > 1
         h_traj = plot(sim_state.ax_main, ...
             target.trajectory_history(:,1), ...
             target.trajectory_history(:,2), '-', ...

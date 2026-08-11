@@ -1,4 +1,4 @@
-function score = rule2_TargetType(target)
+function score = targetTypeRule(target)
     % QUY TAC 2: DANH GIA THEO LOAI MUC TIEU
     % Muc tieu nguy hiem nhat: Mang vu khi sat thuong hang loat
     % Output: score thuoc [0, 10]
@@ -7,13 +7,13 @@ function score = rule2_TargetType(target)
     [target_type, confidence, ~] = classifyTarget(target);
     
     % Bang diem theo loai
-    if contains(target_type, 'MB nem bom')
+    if contains(target_type, 'MB ném bom')
         base_score = 10.0;
-    elseif contains(target_type, 'Tiem kich nem bom')
+    elseif contains(target_type, 'Tiêm kích ném bom')
         base_score = 8.5;
-    elseif contains(target_type, 'Tiem kich chien thuat')
+    elseif contains(target_type, 'Tiêm kích chiến thuật')
         base_score = 7.0;
-    elseif contains(target_type, 'Ten lua hanh trinh')
+    elseif contains(target_type, 'Tên lửa hành trình')
         base_score = 9.0;
     else
         base_score = 5.0;

@@ -52,12 +52,7 @@ fprintf('[6/6] Đang khởi tạo SimulationState...\n');
 state = SimulationState(fig, targets, SCH, targets_protect, fire_units, ...
     ax_main, ax_3d, target_tables, buttons, checkboxes);
 
-%% BƯỚC 7: Cửa sổ Ground Truth và cập nhật bảng lần đầu
-fprintf('[7/7] Đang tạo cửa sổ Ground Truth...\n');
-state.gt_window = createGroundTruthWindow(targets);
-
 updateAllTargetTables(state);
-updateGroundTruthTables(state.gt_window, state.targets, state.SCH, state.fire_units);
 
 fprintf('\n✓ Hệ thống đã sẵn sàng!\n');
 fprintf('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');

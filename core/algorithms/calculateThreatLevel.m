@@ -1,7 +1,7 @@
 function Bj = calculateThreatLevel(target, SCH_pos, targets_protect, fire_units)
     %% TÍNH MỨC ĐỘ QUAN TRỌNG CỦA MỤC TIÊU (8 QUY TẮC)
-    % 
-    % Output: Bj ∈ [0, 10]
+    %
+    % Output: Bj ∈ [0, 1]
     
     % Kiểm tra vùng phân phối 50km
     DISTRIBUTION_RANGE_MAX = 50000;
@@ -13,7 +13,7 @@ function Bj = calculateThreatLevel(target, SCH_pos, targets_protect, fire_units)
     end
     
     % QUY TẮC 1: Lệnh cấp trên (inline - ưu tiên tuyệt đối)
-    if isfield(target, 'priority_from_command') && target.priority_from_command
+    if target.priority_from_command
         Bj = 1.0;
         return;
     end
@@ -22,15 +22,15 @@ function Bj = calculateThreatLevel(target, SCH_pos, targets_protect, fire_units)
     all_targets = target;
     
     % Tính điểm các quy tắc (gọi hàm trong rules/)
-    R2 = rule2_TargetType(target);
-    R3 = rule3_TacticalType(target, all_targets);
-    R4 = rule4_FormationSize(target, all_targets);
-    
+    R2 = targetTypeRule(target);
+    R3 = tacticalTypeRule(target, all_targets);
+    R4 = formationSizeRule(target, all_targets);
+
     SCH_struct = struct('pos', [SCH_pos(1), SCH_pos(2), 0]);
-    R5 = rule5_MissionPredict(target, SCH_struct, targets_protect, fire_units);
-    R6 = rule6_TrajectoryThreat(target, targets_protect);
-    R7 = rule7_TimeToKill(target, fire_units);
-    R8 = rule8_OptimalPosition(target, fire_units);
+    R5 = missionPredictRule(target, SCH_struct, targets_protect, fire_units);
+    R6 = trajectoryThreatRule(target, targets_protect);
+    R7 = timeToKillRule(target, fire_units);
+    R8 = optimalPositionRule(target, fire_units);
     
     % Trọng số (tổng = 1.0)
     w2 = 0.20;  % Loại mục tiêu

@@ -1,4 +1,4 @@
-function score = rule5_MissionPredict(target, SCH, targets_protect, fire_units)
+function score = missionPredictRule(target, SCH, targets_protect, fire_units)
     %% QUY TAC 5: DANH GIA THEO NHIEM VU DU DOAN
     % Uu tien (cao -> thap):
     %   1. Tieu diet luc luong hau phuong (10.0)
@@ -17,7 +17,7 @@ function score = rule5_MissionPredict(target, SCH, targets_protect, fire_units)
     [target_type, ~, ~] = classifyTarget(target);
     
     % Vector huong bay hien tai
-    if isfield(target, 'vel') && norm(target.vel) > 0
+    if norm(target.vel) > 0
         direction = target.vel / norm(target.vel);
     else
         % Neu khong co thong tin van toc, gia dinh bay ve huong Dong
@@ -93,7 +93,7 @@ function score = rule5_MissionPredict(target, SCH, targets_protect, fire_units)
     %   - Huong: Bay thang den MTBV (goc < 30 do)
     %   - Van toc: Hon toc do hanh trinh (dang tien cong)
     % -------------------------------------------------------
-    if contains(target_type, 'MB nem bom') || contains(target_type, 'nem bom')
+    if contains(target_type, 'MB ném bom') || contains(target_type, 'ném bom')
         if min_angle_to_protect < 30
             % Bay thang den MTBV
             score = 10.0;
@@ -112,7 +112,7 @@ function score = rule5_MissionPredict(target, SCH, targets_protect, fire_units)
     %   - Huong: Bay den SCH hoac don vi hoa luc (goc < 30 do)
     %   - Van toc: Cao (dang tien cong nhanh)
     % -------------------------------------------------------
-    if contains(target_type, 'Tiem kich') || contains(target_type, 'Ten lua')
+    if contains(target_type, 'Tiêm kích') || contains(target_type, 'Tên lửa')
         if angle_to_sch < 30 || min_angle_to_fire < 30
             % Bay thang den SCH hoac hoa luc
             score = 9.0;

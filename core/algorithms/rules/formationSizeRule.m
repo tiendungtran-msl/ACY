@@ -1,21 +1,18 @@
-function score = rule4_FormationSize(target, all_targets)
+function score = formationSizeRule(target, all_targets)
     % QUY TAC 4: DANH GIA THEO SO LUONG
     % Output: score thuoc [0, 10]
     
     % Uoc luong tu RCS
-    if isfield(target, 'RCS_eff')
-        RCS = target.RCS_eff;
-    else
-        RCS = target.RCS;
-    end
-    
+    RCS = target.RCS_eff;
+
+
     [target_type, ~, ~] = classifyTarget(target);
     
-    if contains(target_type, 'MB nem bom')
+    if contains(target_type, 'MB ném bom')
         RCS_single = 12;
-    elseif contains(target_type, 'Tiem kich')
+    elseif contains(target_type, 'Tiêm kích')
         RCS_single = 3;
-    elseif contains(target_type, 'Ten lua')
+    elseif contains(target_type, 'Tên lửa')
         RCS_single = 0.5;
     else
         RCS_single = 3;
@@ -30,7 +27,7 @@ function score = rule4_FormationSize(target, all_targets)
     
     for i = 1:length(all_targets)
         other = all_targets(i);
-        if other.id ~= target.id && strcmp(other.status, 'Dang bay')
+        if other.id ~= target.id && strcmp(other.status, 'Đang bay')
             dist = norm(target.pos - other.pos);
             if dist < formation_radius
                 nearby_count = nearby_count + 1;

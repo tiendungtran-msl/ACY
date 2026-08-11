@@ -1,4 +1,4 @@
-function score = rule7_TimeToKill(target, fire_units)
+function score = timeToKillRule(target, fire_units)
     % QUY TAC 7: DANH GIA THEO THOI GIAN TIEP CAN
     % Output: score thuoc [0, 10]
     
@@ -25,7 +25,7 @@ function score = rule7_TimeToKill(target, fire_units)
         if distance_to_zone == 0
             time_to_zone = 0;
         else
-            if isfield(target, 'vel') && norm(target.vel) > 0
+            if norm(target.vel) > 0
                 velocity = target.vel;
                 to_unit = unit.pos - target.pos;
                 vel_toward_unit = dot(velocity(1:2), to_unit(1:2)) / norm(to_unit(1:2));

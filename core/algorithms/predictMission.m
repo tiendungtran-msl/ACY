@@ -17,18 +17,14 @@ function mission_text = predictMission(target, SCH, targets_protect, fire_units)
     altitude = target.pos(3);
     
     % Vector hướng bay
-    if isfield(target, 'vel') && norm(target.vel) > 0
+    if norm(target.vel) > 0
         direction = target.vel / norm(target.vel);
     else
         direction = [1, 0, 0];
     end
-    
+
     % Khả năng cơ động
-    if isfield(target, 'maneuver_ability')
-        n_max = target.maneuver_ability;
-    else
-        n_max = 5;
-    end
+    n_max = target.maneuver_ability;
     
     % Gây nhiễu
     has_jamming = strcmp(target.jam_type, 'Chủ động') || strcmp(target.jam_type, 'Thụ động');

@@ -9,7 +9,6 @@ classdef SimulationState < handle
     %   state = SimulationState(fig, targets, SCH, targets_protect, ...
     %                           fire_units, ax_main, ax_3d, ...
     %                           target_tables, buttons, checkboxes);
-    %   state.gt_window = createGroundTruthWindow(targets);
     %   updateAllTargetTables(state);
 
     properties
@@ -26,7 +25,6 @@ classdef SimulationState < handle
         target_tables    % cell array của uitable handles
         buttons          % struct: .start, .pause, .reset
         checkboxes       % cell array của uicontrol handles
-        gt_window        % struct từ createGroundTruthWindow
 
         % --- Trạng thái mô phỏng ---
         is_running = false
@@ -61,7 +59,6 @@ classdef SimulationState < handle
             obj.target_tables   = target_tables;
             obj.buttons         = buttons;
             obj.checkboxes      = checkboxes;
-            obj.gt_window       = struct();
 
             n = length(targets);
             obj.h_targets_2d = gobjects(n, 1);
@@ -190,10 +187,6 @@ classdef SimulationState < handle
 
             % Cập nhật bảng
             updateAllTargetTables(obj);
-            if isfield(obj.gt_window, 'fig') && ...
-               ishandle(obj.gt_window.fig) && isvalid(obj.gt_window.fig)
-                updateGroundTruthTables(obj.gt_window, obj.targets, obj.SCH, obj.fire_units);
-            end
 
             set(obj.buttons.start, 'Enable', 'on');
             set(obj.buttons.pause, 'Enable', 'off');
@@ -240,11 +233,6 @@ classdef SimulationState < handle
                 % 4. Cập nhật bảng (mỗi 0.5 giây)
                 if obj.time - obj.last_table_update >= 0.5
                     updateAllTargetTables(obj);
-                    if isfield(obj.gt_window, 'fig') && ...
-                       ishandle(obj.gt_window.fig) && isvalid(obj.gt_window.fig)
-                        updateGroundTruthTables(obj.gt_window, obj.targets, ...
-                            obj.SCH, obj.fire_units);
-                    end
                     obj.last_table_update = obj.time;
                 end
 

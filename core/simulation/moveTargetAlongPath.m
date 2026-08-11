@@ -200,7 +200,7 @@ function target = moveTargetAlongPath(target, dt)
     % ═══════════════════════════════════════════════════════
     % LƯU QUỸ ĐẠO ĐÃ ĐI QUA (CHỈ 2D)
     % ═══════════════════════════════════════════════════════
-    if ~isfield(target, 'trajectory_history') || isempty(target.trajectory_history)
+    if isempty(target.trajectory_history)
         target.trajectory_history = target.pos(1:2);
     else
         % Chỉ lưu nếu di chuyển đủ xa (tránh lưu quá dày)

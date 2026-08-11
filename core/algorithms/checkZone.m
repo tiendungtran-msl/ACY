@@ -1,5 +1,5 @@
-function in_zone = Block2_CheckZone(target_pos, SCH_pos, range_min, range_max)
-    %% KHỐI 2: KIỂM TRA VỊ TRÍ TRONG VÙNG PHÂN PHỐI
+function in_zone = checkZone(target_pos, SCH_pos, range_min, range_max)
+    %% KIỂM TRA VỊ TRÍ TRONG VÙNG PHÂN PHỐI
     % Mô tả: Kiểm tra mục tiêu có nằm trong vùng phân phối không (Dб < Dⱼ < Dд)
     % Input:
     %   - target_pos: Vị trí mục tiêu [x, y, z]

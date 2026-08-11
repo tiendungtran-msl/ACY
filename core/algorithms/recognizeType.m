@@ -1,5 +1,5 @@
-function target_type = Block4_RecognizeType(target, targetDB)
-    %% KHỐI 4: NHẬN DẠNG DẠNG MỤC TIÊU
+function target_type = recognizeType(target, targetDB)
+    %% NHẬN DẠNG DẠNG MỤC TIÊU
     % Mô tả: Nhận dạng loại mục tiêu dựa trên đặc trưng kỹ thuật (Bảng 2)
     % Input:
     %   - target: Cấu trúc mục tiêu

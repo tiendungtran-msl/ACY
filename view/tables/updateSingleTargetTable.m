@@ -30,11 +30,7 @@ function updateSingleTargetTable(table_handle, target, SCH, targets_protect, fir
         pos_measured = target.pos;
         speed_measured = target.speed;
         
-        if isfield(target, 'RCS_eff')
-            RCS_measured = target.RCS_eff;
-        else
-            RCS_measured = target.RCS;
-        end
+        RCS_measured = target.RCS_eff;
         
         % Phát hiện gây nhiễu
         if strcmp(target.jam_type, 'Chủ động')
@@ -51,7 +47,7 @@ function updateSingleTargetTable(table_handle, target, SCH, targets_protect, fir
         % Khoảng cách
         dist_to_sch = norm(target.pos(1:2) - SCH.pos(1:2)) / 1000;
         
-        if isfield(target, 'distance_to_DVHL') && ~isinf(target.distance_to_DVHL)
+        if ~isinf(target.distance_to_DVHL)
             dist_DVHL = target.distance_to_DVHL / 1000;
         else
             dist_DVHL = 0;
@@ -68,13 +64,15 @@ function updateSingleTargetTable(table_handle, target, SCH, targets_protect, fir
             'Gia tốc', sprintf('%.2f m/s²', target.current_accel);
             'RCS', sprintf('%.3f m²', RCS_measured);
             'Nhiệm vụ', predictMission(target, SCH, targets_protect, fire_units);
-            'Lệnh ưu tiên', char(string(target.priority_from_command));
-            'Bj', sprintf('★ %.2f/10', Bj)
+            'Lệnh ưu tiên', ternaryLabel(target.priority_from_command, '⚡ Có', 'Không');
+            'Bj', sprintf('★ %.2f', Bj)
         };
         
+        table_width = getpixelposition(table_handle);
+        table_width = table_width(3);
         set(table_handle, 'Data', data);
-        set(table_handle, 'ColumnWidth', {85, 130});
-        
+        set(table_handle, 'ColumnWidth', {round(table_width*0.38), round(table_width*0.56)});
+
         % Màu nền theo Bj
         n_rows = size(data, 1);
         bg_colors = createTableBackgroundColors(n_rows, Bj);
@@ -89,7 +87,17 @@ function updateSingleTargetTable(table_handle, target, SCH, targets_protect, fir
             'Tên', target.name;
             'Trạng thái', '✓ HOÀN THÀNH'
         };
+        table_width = getpixelposition(table_handle);
+        table_width = table_width(3);
         set(table_handle, 'Data', data);
-        set(table_handle, 'ColumnWidth', {85, 130});
+        set(table_handle, 'ColumnWidth', {round(table_width*0.38), round(table_width*0.56)});
+    end
+end
+
+function label = ternaryLabel(condition, if_true, if_false)
+    if condition
+        label = if_true;
+    else
+        label = if_false;
     end
 end
