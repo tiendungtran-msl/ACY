@@ -33,7 +33,6 @@ function score = rule6_TrajectoryThreat(target, targets_protect)
             end
         end
         
-        % CPA
         if norm(velocity(1:2)) > 0
             to_protect = protect_pos(1:2) - target.pos(1:2);
             vel_2d = velocity(1:2);

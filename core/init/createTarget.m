@@ -1,7 +1,11 @@
 function tgt = createTarget(id, name, type, speed_cruise, RCS, maneuver, ...
                             task, jam_type, group_size, waypoints, color, marker)
-    %% TẠO CẤU TRÚC MỤC TIÊU CHUẨN VỚI ĐỘNG LỰC HỌC
-    % waypoints: Ma trận Nx3 [x, y, z]
+    %% TẠO TARGET OBJECT (thin wrapper → Target class)
+    % Toàn bộ logic khởi tạo (RCS_min/max, speed_min/max, accel_max...)
+    % đã được chuyển vào Target constructor và initTypeParams().
+    tgt = Target(id, name, type, speed_cruise, RCS, maneuver, ...
+                 task, jam_type, group_size, waypoints, color, marker);
+end
     
     % Xác định các tham số theo loại mục tiêu (dựa vào Bảng 2)
     if contains(type, 'B52') || contains(type, 'chiến lược') || contains(type, 'MB ném bom')

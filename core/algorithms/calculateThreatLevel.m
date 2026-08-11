@@ -14,7 +14,7 @@ function Bj = calculateThreatLevel(target, SCH_pos, targets_protect, fire_units)
     
     % QUY TẮC 1: Lệnh cấp trên (inline - ưu tiên tuyệt đối)
     if isfield(target, 'priority_from_command') && target.priority_from_command
-        Bj = 10.0;
+        Bj = 1.0;
         return;
     end
     

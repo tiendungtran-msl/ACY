@@ -3,31 +3,34 @@
 %% Air Defense Command Automation System (АСУ ПВО)
 %% ============================================================
 % Tác giả: Trần Tiến Dũng
-% Ngày: 2025-11-12
 % Mô tả: Script chính khởi động hệ thống mô phỏng
 %% ============================================================
 
-% Khởi tạo môi trường
 clear; clc; close all;
+
+%% PATH SETUP — thêm tất cả subfolders vào MATLAB path
+% Cần thiết khi chạy ngoài MATLAB Project (ACY_Simulation.prj)
+rootDir = fileparts(mfilename('fullpath'));
+addpath(genpath(rootDir));
 
 fprintf('\n');
 fprintf('╔══════════════════════════════════════════════════════╗\n');
-fprintf('║       HỆ THỐNG TỰ ĐỘNG HÓA CHỈ HUY PHÒNG KHÔNG      ║\n');
+fprintf('║       HỆ THỐNG TỰ ĐỘNG HÓA CHỈ HUY PHÒNG KHÔNG       ║\n');
 fprintf('║     Air Defense Command Automation System (АСУ ПВО)  ║\n');
 fprintf('╚══════════════════════════════════════════════════════╝\n');
 fprintf('\n');
 
-%% BƯỚC 0: Tải cấu hình hệ thống
+%% BƯỚC 0: Tải cấu hình
 fprintf('[0/6] Đang tải cấu hình...\n');
 cfg = config();
 
-%% BƯỚC 1: Khởi tạo dữ liệu
+%% BƯỚC 1: Khởi tạo dữ liệu (trả về Target / FireUnit handle objects)
 fprintf('[1/6] Đang khởi tạo dữ liệu...\n');
 [SCH, targets_protect, fire_units, targets] = initializeData();
 
-%% BƯỚC 2: Tạo đường cong chuyển động
+%% BƯỚC 2: Tạo đường cong chuyển động (sửa trực tiếp trên Target handles)
 fprintf('[2/6] Đang tạo đường cong chuyển động...\n');
-targets = createSmoothPaths(targets);
+createSmoothPaths(targets);
 
 %% BƯỚC 3: Thiết lập giao diện
 fprintf('[3/6] Đang thiết lập giao diện...\n');
@@ -38,27 +41,23 @@ fprintf('[4/6] Đang vẽ môi trường...\n');
 drawStaticElements(ax_main, ax_3d, SCH, targets_protect, fire_units);
 drawPlannedPaths(ax_main, ax_3d, targets);
 
-%% BƯỚC 5: Tạo bảng điều khiển
+%% BƯỚC 5: Tạo bảng điều khiển (callbacks sẽ được ghi đè ở Bước 6)
 fprintf('[5/6] Đang tạo bảng điều khiển...\n');
-[target_tables, control_buttons, target_checkboxes] = ...
-    createControlPanel(fig, targets);
+[target_tables, buttons, checkboxes] = createControlPanel(fig, targets);
 
-%% BƯỚC 6: Khởi tạo trạng thái mô phỏng
-fprintf('[6/6] Đang khởi tạo trạng thái...\n');
-sim_state = initializeSimulationState(fig, targets, SCH, ...
-    targets_protect, fire_units, ax_main, ax_3d, ...
-    target_tables, control_buttons, target_checkboxes);
+%% BƯỚC 6: Khởi tạo SimulationState (handle class trung tâm)
+%   - Lưu reference vào appdata (một lần duy nhất)
+%   - Đăng ký callbacks cho tất cả nút và checkbox
+fprintf('[6/6] Đang khởi tạo SimulationState...\n');
+state = SimulationState(fig, targets, SCH, targets_protect, fire_units, ...
+    ax_main, ax_3d, target_tables, buttons, checkboxes);
 
-% Cập nhật bảng thông tin ban đầu
-updateAllTargetTables(sim_state);
-
-%% BƯỚC 7: Tạo cửa sổ Ground Truth
+%% BƯỚC 7: Cửa sổ Ground Truth và cập nhật bảng lần đầu
 fprintf('[7/7] Đang tạo cửa sổ Ground Truth...\n');
-gt_window = createGroundTruthWindow(targets);
-sim_state.gt_window = gt_window;
+state.gt_window = createGroundTruthWindow(targets);
 
-% Cập nhật lần đầu
-updateGroundTruthTables(gt_window, sim_state.targets, sim_state.SCH, sim_state.fire_units);
+updateAllTargetTables(state);
+updateGroundTruthTables(state.gt_window, state.targets, state.SCH, state.fire_units);
 
 fprintf('\n✓ Hệ thống đã sẵn sàng!\n');
 fprintf('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
